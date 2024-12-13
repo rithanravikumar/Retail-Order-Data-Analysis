@@ -133,7 +133,7 @@ def get_connection():
     return conn
 
 # Page title
-st.title("SQL Query Runner - Retail Order Data Analysis")
+st.title("Retail Order Data Analysis using SQL)
 
 # Sidebar for categories
 selected_category = st.sidebar.selectbox("Select Query Category:", list(SQL_queries.keys()))
@@ -162,4 +162,6 @@ for idx, query in enumerate(queries, start=1):
         except Exception as e:
             st.error(f"An error occurred while executing the query: {e}")
             
-st.text("THANK YOU FOR VISITING MY SITE")
+st.text("THANK YOU VISITORS...!!!")
+st.text("SEE YOU AGAIN...!!!")
+
