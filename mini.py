@@ -1,93 +1,161 @@
-
-# streamlit_app.py
-
+import pandas as pd;
 import streamlit as st
 import pg8000
-import pandas as pd
 
-# Function to connect to the PostgreSQL databas
-def get_db_connection():
+
+
+SQL_queries = {
+    "Guvi Queries:": [
+        {"query_name": "Top 10 Highest Revenue Generating Products","query": """
+        select p.product_id,p.sub_category,round(sum(o.sale_price::numeric * o.quantity::numeric),2) as revenue 
+        from product_data p join order_data o 
+        on p.product_id=o.product_id group by p.product_id order by revenue desc limit 10;
+    """},
+    {"query_name": "Top 5 Cities with the Highest Profit Margins","query": """
+        select city,avg(case when sale_price = 0 then 0 else ((profit/sale_price)*100) end)
+        as profit_margin from order_data group by city order by profit_margin desc limit 5;
+    """},
+    {"query_name":"Total Discount Given for Each Category","query": """
+        select p.category,sum(o.discount_price) as total_discount from product_data p 
+        join order_data o on p.product_id=o.product_id group by p.category;
+    """},
+    {"query_name":"Find the average sale price per product category","query": """
+        select p.category,avg(o.sale_price) as Avg_saleprice from order_data o join product_data p
+        on p.product_id= o.product_id group by category;
+    """},
+     {"query_name":"Find the region with the highest average sale price","query": """
+        select region, avg(sale_price) as avg_sales from order_data group by region order by avg_sales desc limit 1;
+    """},
+     {"query_name":"Find the total profit per categor","query": """
+        select p.category, sum(o.profit) as total_profit from product_data p join order_data o on 
+        p.product_id=o.product_id group by p.category;
+    """},
+     {"query_name":"Identify the top 3 segments with the highest quantity of orders","query": """
+         select segment, sum(quantity) as highest_quantity  from order_data group by segment 
+         order by highest_quantity desc;
+    """},
+     {"query_name":"Determine the average discount percentage given per region","query": """
+        select region, round(avg(discount_percent),2) as avg_discount from order_data group by region;
+    """},
+     {"query_name":"Find the product category with the highest total profit","query": """
+        select p.category, round(sum(o.profit)::numeric,2) as total_profit from product_data p join order_data o 
+        on p.product_id=o.product_id group by p.category order by total_profit desc limit 1;
+    """},
+     {"query_name":"Calculate the total revenue generated per year","query": """
+        select year, round(sum(sale_price)::numeric,2) as Revenue_per_year from order_data group by year;
+    """},
+    ],
+
+    "Self Queries:": [
+        {"query_name":"Find total sales revenue for each region","query": """
+        select region, sum(sale_price * quantity) as total_revenue from order_data group by region;
+    """},
+    {"query_name":"Identify regions with total profits greater than $50,000","query": """
+        select region, sum(profit*quantity) as total_profit from order_data group by region
+        having sum(profit*quantity) >50000;
+    """},
+    {"query_name":"Find the region with the highest number of orders","query": """
+        select region, count(order_id) as order_count
+        from order_data group by region
+        order by order_count desc limit 1;
+    """},
+    {"query_name":"Count the total number of orders each year","query": """
+       select year, count(distinct order_id) as total_orders from order_data group by year;
+    """},
+     {"query_name":"Count unique products in each category","query": """
+        select category, count(distinct product_id) as unique_products from product_data group by category;
+    """},
+     {"query_name":"List top 3 states with the most orders","query": """
+        select state, count(distinct order_id) as total_orders from order_data group by state order by total_orders desc limit 3;
+    """},
+     {"query_name":"List regions with negative profit products","query": """
+        select region from order_data where profit < 0 group by region;
+    """},
+     {"query_name":"Determine the most frequently ordered product","query": """
+        select p.product_id,p.sub_category, count(distinct o.order_id) as order_frequency from product_data p join order_data o 
+        on p.product_id=o.product_id group by p.product_id order by order_frequency desc limit 1;
+    """},
+     {"query_name":"Identify cities with profits exceeding $10,000","query": """
+        select city, sum(profit) as total_profit 
+        from order_data group by city having sum(profit) > 10000 order by total_profit desc ;
+    """},
+     {"query_name":"Identify top 5 sub categories with the most products sold","query": """
+       select p.sub_category, sum(o.quantity) as total_quantity from product_data p join order_data o on p.product_id=o.product_id
+       group by p.sub_category order by total_quantity desc limit 5;
+    """},
+    ],
+
+    "Business Insights:": 
+     [
+      {"query_name":"Top-Selling Products","query": """
+        select p.product_id,p.sub_category,sum(o.quantity*o.sale_price) as total_revenue,sum(o.quantity) as total_quantity_sold,
+        rank() over(order by sum(o.quantity) desc) as rank 
+        from product_data p join order_data o on p.product_id=o.product_id group by p.product_id;
+    """},
+    {"query_name":"Monthly Sales Analysis","query": """
+        with y1 as (select month,year,sum(sale_price) as msa
+        from order_data where year = 2023 group by month,year),
+        y2 as (select month,year,sum(sale_price) as msa
+        from order_data where year = 2022 group by month,year)
+
+        select y1.month,(((y1.msa - y2.msa) / y2.msa) * 100) as sales_growth_rate from y1 y1 join y2 y2 on
+        y1.month=y2.month and y1.year=y2.year+1 order by y1.month asc;
+    """},
+    {"query_name":"Product Performance","query": """
+        select p.product_id,p.category,p.sub_category, round(sum(o.sale_price * o.quantity)::numeric,2)as total_revenue,
+        round(sum(o.profit*o.quantity)::numeric,2) as total_profit, case when sum(o.sale_price) = 0 then 0 
+        else round((sum(o.profit)/ sum(o.sale_price))*100) end as profit_margin,rank() over(order by round(sum(o.sale_price * o.quantity)::numeric,2) desc)
+        from product_data p join order_data o on p.product_id=o.product_id group by p.product_id;
+    """},
+    {"query_name":"Regional Sales Analysis","query": """
+       select region, round(count(distinct order_id)::numeric, 2) as total_order, round(sum(sale_price*quantity)::numeric,2) 
+       as total_sale, round(sum(profit*quantity)::numeric,2) as total_profit,round((sum(profit)/ sum(sale_price))*100) as profit_margin,
+       rank() over(order by round(sum(sale_price* quantity)::numeric,2) desc) from order_data group by region;
+    """},
+     {"query_name":"Discount Analysis","query":"""
+        select product_id,sum(quantity) as total_quantity,sum(discount_percent) as total_disc_percent,
+        round(sum(discount_price)::numeric,2) as total_discount,
+        round(sum(sale_price)::numeric,2) as total_sale, round((sum(discount_price)::numeric/
+        sum(sale_price)::numeric)* 100,2) as impacted_discount_percentage from order_data 
+        group by product_id having sum(discount_percent)>20 order by impacted_discount_percentage desc;
+    """}, 
+]
+}
+
+# Database connection
+def get_connection():
     conn = pg8000.connect(
-       host="dsrithandb.czqo46sewhyn.ap-south-1.rds.amazonaws.com",
-        port=5432,
-        database="retail_order",
-        user="postgres",
-        password="Awsrootroot"
+        host = "dsrithandb.czqo46sewhyn.ap-south-1.rds.amazonaws.com",
+        user = "postgres",
+        password = "Awsrootroot",
+        database = "retail_order",        
     )
     return conn
-    
-# Function to execute a query and return the result as a pandas DataFrame
-def run_query(query):
-    conn = get_db_connection()
-    if conn is None:
-        return None  # Return None if connection failed
-    
-    try:
-        df = pd.read_sql(query, conn)
-        return df
-    except Exception as e:
-        st.error(f"Error executing query: {e}")
-        return None
-    finally:
-        conn.close()
 
-queries=[
-#Query1
-"select c.sub_category as product,sum(p.sales_price * p.quantity) as Top_10_Revenue from order_ret1 as c join order_ret2 as p on c.order_id = p.id group by c.sub_category order by Top_10_Revenue DESC limit 10;",
-#Query2
-"select c.city, avg(case when sales_price = 0 then 0 else ((p.profit/p.sales_price)* 100) end) as profit_margin from order_ret1 as c join order_ret2 as p on c.order_id=p.id group by c.city order by profit_margin desc limit 5;"
-#Query3
- "select c.category, sum(p.discount) as total_discount from order_ret1 as c, order_ret2 as p group by c.category;",
-#Query4
- "select c.category, avg(p.sales_price) as avg_sales_price from order_ret1 as c join order_ret2 as p on c.order_id=p.id group by c.category;",
-#Query5
-"select c.region,(sum(p.sales_price * p.quantity)/sum(p.quantity))as highest_average_salesprice from order_ret2 as p, order_ret1 as c group by c.region order by highest_average_Salesprice desc limit 1;",
-#Query 6
-"select c.category, sum((p.sales_price-p.cost_price)*p.quantity) as total_profit from order_ret2 as p, order_ret1 as c group by c.category;",
-#Query 7
- "select c.segment, sum(p.quantity) as highest_quantity from order_ret2 as p, order_ret1 as c group by c.segment order by highest_quantity desc limit 3;",
-#Query 8
-"select c.region,avg(p.discount_percent) as avg_discount_percentage from order_ret1 as c join order_ret2 as p on c.order_id=p.id group by c.region;",
-#Query 9
-" select c.category,sum(p.profit) as total_profit from order_ret2 as p, order_ret1 as c group by c.category order by total_profit desc;",
-#Query10
- "select extract(Year from c.order_date) as Year, sum((p.sales_price)*p.quantity) as TotalRevenue from order_ret2 as p, order_ret1 as c group by  extract(Year from c.order_date) order by Year;",
-#Query11 Join to Fetch Complete Order Details*******/
-"SELECT c.order_id, c.order_date, c.Region,p.cost_price,p.sales_price, p.quantity, p.discount_percent FROM order_ret1 as c JOIN order_ret2 as p ON c.order_id = p.id;",
-#Query12 Calculate Total Revenue per Order*******/ 
-"select c.order_id, sum(p.sales_price *p.quantity)as total_revenue from order_ret1 as c join order_ret2 as p on c.order_id=p.id group by c.order_id;",
- #Query13 Calculate Total profit per Order
-"select c.order_id, sum((p.sales_price - p.cost_price)*p.quantity)as total_profit from order_ret1 as c join order_ret2 as p on c.order_id=p.id group by c.order_id;",
- #Query14 Least Revenue generating products
-"select c.sub_category as product,sum(p.sales_price * p.quantity) as least_Revenue from order_ret1 as c, order_ret2 as p group by c.sub_category order by least_Revenue asc limit 10;",
-#Query 15 Count Orders by Region
- "select region, sum(order_id) as count_orders from order_ret1 group by region;",
-#Query16 Calculate Average Discount by state 
-"select c.state, avg(p.discount_percent) as avg_discount from order_ret1 as c, order_ret2 as p group by c.state;",
- #Query17 Calculate the total revenue generated on December month 
-"select extract(Month from c.order_date) as Month, sum((p.sales_price)*p.quantity) as TotalRevenue from order_ret2 as p, order_ret1 as c group by  extract(Month from c.order_date) order by Month;",
-#Query18 Region with the Highest Profit*************/													
-"select c.region,sum((p.sales_price-p.cost_price)*p.quantity) as highest_profit from order_ret2 as p, order_ret1 as c group by c.region order by highest_profit desc limit 1;",
-#Query19 Identify Orders with No Profit (Profit = 0)
- "select c.order_id,(p.sales_price - p.cost_price)*quantity as profit from order_ret2 as p join order_ret1 as c on c.order_id=p.id where  (p.sales_price - p.cost_price)*quantity=0;",
-#Query20 Most Frequently Ordered Product Category********/
-"SELECT c.category, count(p.id) AS OrderCount FROM order_ret1 as c JOIN order_ret2 as p ON c.order_id = p.id GROUP BY c.category ORDER BY OrderCount DESC LIMIT 1;"
-]
+# Page title
+st.title("SQL Query Runner - Retail Order Data Analysis")
 
-# Streamlit UI
-st.title("PostgreSQL Queries Results")
-st.subheader("1-10 Query by GUVI")
-st.subheader("11-20 My Queries")
-for i, query in enumerate(queries, start=1):
-    st.subheader(f"Query {i}")
-    st.text(query)  # Show the query
-    try:
-        result_df = run_query(query)
-        if result_df is not None:
-             st.dataframe(result_df)  # Show the result as a dataframe
-        else:
-            st.error(f"Query {i} failed to execute.")
-    except Exception as e:
-        st.error(f"Error running query {i}: {e}")
+# Sidebar for categories
+selected_category = st.sidebar.selectbox("Select Query Category:", list(SQL_queries.keys()))
 
-st.text("Thank you")
+# Show queries in the selected category
+queries = SQL_queries[selected_category]
+
+for idx, query in enumerate(queries, start=1):
+    # Display the query as a button with the query name
+    if st.button(f"Run Query {idx}: {query['query_name']}"):
+        try:
+            # Connect to the database and execute the query
+            conn = get_connection()
+            df = pd.read_sql_query(query["query"], conn)  # Pass the query string
+            conn.close()
+
+            # Display the results as a table
+            if not df.empty:
+                st.dataframe(df)
+            else:
+                st.warning("Query returned no results.")
+        except Exception as e:
+            st.error(f"An error occurred while executing the query: {e}")
+
+st.text("THANK YOU FOR VISITING MY SITE")
