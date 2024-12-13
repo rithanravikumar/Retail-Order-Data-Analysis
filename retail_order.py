@@ -143,12 +143,12 @@ queries = SQL_queries [selected_category]
 
 for idx, query in enumerate(queries, start=1):
     with st.expander(f"Query {idx}: Click to view and run"):
-        st.code(query, language="sql")
+        st.code(query["query"], language="sql")  # Display the SQL query in the expander
         if st.button(f"Run Query {idx}"):
             try:
                 # Connect to the database and execute the query
                 conn = get_connection()
-                df = pd.read_sql_query(query, conn)
+                df = pd.read_sql_query(query["query"], conn)  # Pass the query string
                 conn.close()
 
                 # Display the results as a table
@@ -158,3 +158,6 @@ for idx, query in enumerate(queries, start=1):
                     st.warning("Query returned no results.")
             except Exception as e:
                 st.error(f"An error occurred while executing the query: {e}")
+
+
+st.text("THANK YOU FOR VISITING MY SITE")
