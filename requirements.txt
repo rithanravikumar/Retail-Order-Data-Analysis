@@ -1,2 +1,3 @@
-pip install sqlalchemy
-pip install psycopg2-binary
+pandas
+streamlit
+pg8000
