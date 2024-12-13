@@ -133,7 +133,7 @@ def get_connection():
     return conn
 
 # Page title
-st.title("Retail Order Data Analysis using SQL)
+st.title("Retail Order Data Analysis using SQL")
 
 # Sidebar for categories
 selected_category = st.sidebar.selectbox("Select Query Category:", list(SQL_queries.keys()))
