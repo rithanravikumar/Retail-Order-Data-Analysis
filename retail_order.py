@@ -5,7 +5,7 @@ import pg8000
 
 
 SQL_queries = {
-    "Guvi Queries:": [
+    "Guvi Queries": [
         {"query_name": "Top 10 Highest Revenue Generating Products","query": """
         select p.product_id,p.sub_category,round(sum(o.sale_price::numeric * o.quantity::numeric),2) as revenue 
         from product_data p join order_data o 
@@ -46,7 +46,7 @@ SQL_queries = {
     """},
     ],
 
-    "Self Queries:": [
+    "Self Queries": [
         {"query_name":"Find total sales revenue for each region","query": """
         select region, sum(sale_price * quantity) as total_revenue from order_data group by region;
     """},
@@ -85,7 +85,7 @@ SQL_queries = {
     """},
     ],
 
-    "Business Insights:": 
+    "Business Insights": 
      [
       {"query_name":"Top-Selling Products","query": """
         select p.product_id,p.sub_category,sum(o.quantity*o.sale_price) as total_revenue,sum(o.quantity) as total_quantity_sold,
