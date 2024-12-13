@@ -6,12 +6,12 @@ import pg8000
 
 SQL_queries = {
     "Guvi Queries:": [
-        {"query_name": "1.Top 10 Highest Revenue Generating Products","query": """
+        {"query_name": "Top 10 Highest Revenue Generating Products","query": """
         select p.product_id,p.sub_category,round(sum(o.sale_price::numeric * o.quantity::numeric),2) as revenue 
         from product_data p join order_data o 
         on p.product_id=o.product_id group by p.product_id order by revenue desc limit 10;
     """},
-    {"query_name": "2. Top 5 Cities with the Highest Profit Margins","query": """
+    {"query_name": "Top 5 Cities with the Highest Profit Margins","query": """
         select city,avg(case when sale_price = 0 then 0 else ((profit/sale_price)*100) end)
         as profit_margin from order_data group by city order by profit_margin desc limit 5;
     """},
