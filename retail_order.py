@@ -139,25 +139,27 @@ st.title("SQL Query Runner - Retail Order Data Analysis")
 selected_category = st.sidebar.selectbox("Select Query Category:", list(SQL_queries.keys()))
 
 # Show queries in the selected category
-queries = SQL_queries [selected_category]
+
+queries = SQL_queries[selected_category]
 
 for idx, query in enumerate(queries, start=1):
-    with st.expander(f"Query {idx}: Click to view and run"):
-        st.code(query["query"], language="sql")  # Display the SQL query in the expander
-        if st.button(f"Run Query {idx}"):
-            try:
-                # Connect to the database and execute the query
-                conn = get_connection()
-                df = pd.read_sql_query(query["query"], conn)  # Pass the query string
-                conn.close()
+    # Display the query question
+    st.markdown(f"**Query {idx}: {query['query_name']}**")  # Display the question
 
-                # Display the results as a table
-                if not df.empty:
-                    st.dataframe(df)
-                else:
-                    st.warning("Query returned no results.")
-            except Exception as e:
-                st.error(f"An error occurred while executing the query: {e}")
+    # Button to run the query
+    if st.button(f"Run Query {idx}"):
+        try:
+            # Connect to the database and execute the query
+            conn = get_connection()
+            df = pd.read_sql_query(query["query"], conn)  # Pass the query string
+            conn.close()
 
-
+            # Display the results as a table
+            if not df.empty:
+                st.dataframe(df)
+            else:
+                st.warning("Query returned no results.")
+        except Exception as e:
+            st.error(f"An error occurred while executing the query: {e}")
+            
 st.text("THANK YOU FOR VISITING MY SITE")
