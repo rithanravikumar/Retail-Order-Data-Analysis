@@ -132,26 +132,6 @@ def get_connection():
     )
     return conn
 
-def set_background(image_path):
-    
-    st.markdown(
-        f"""
-        <style>
-        .stApp {{
-            background-image: url("file://{https://images.unsplash.com/photo-1718241905696-cb34c2c07bed?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTJ8fGRhdGElMjBzY2llbmNlfGVufDB8fDB8fHww}");
-            background-size: cover;
-            background-repeat: no-repeat;
-            background-attachment: fixed;
-        }}
-        </style>
-        """,
-        unsafe_allow_html=True
-    )
-
-# Set the background image
-set_background("https://images.unsplash.com/photo-1718241905696-cb34c2c07bed?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTJ8fGRhdGElMjBzY2llbmNlfGVufDB8fDB8fHww")
-
-
 
 # Page title
 st.title("Retail Order Data Analysis using SQL")
