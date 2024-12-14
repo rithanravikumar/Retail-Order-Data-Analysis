@@ -137,7 +137,7 @@ st.title("Retail Order Data Analysis using SQL")
 
 
 # Sidebar for categories
-selected_category = st.selectbox("Select Query Category:", list(SQL_queries.keys()))
+selected_category = st.radio("Select Query Category:", list(SQL_queries.keys()))
 
 # Show queries in the selected category
 
