@@ -5,7 +5,7 @@ import pg8000
 
 
 SQL_queries = {
-    "Guvi Queries:": [
+    "Guvi Queries": [
         {"query_name": "Top 10 Highest Revenue Generating Products","query": """
         select p.product_id,p.sub_category,round(sum(o.sale_price::numeric * o.quantity::numeric),2) as revenue 
         from product_data p join order_data o 
@@ -46,7 +46,7 @@ SQL_queries = {
     """},
     ],
 
-    "Self Queries:": [
+    "Self Queries": [
         {"query_name":"Find total sales revenue for each region","query": """
         select region, sum(sale_price * quantity) as total_revenue from order_data group by region;
     """},
@@ -85,7 +85,7 @@ SQL_queries = {
     """},
     ],
 
-    "Business Insights:": 
+    "Business Insights": 
      [
       {"query_name":"Top-Selling Products","query": """
         select p.product_id,p.sub_category,sum(o.quantity*o.sale_price) as total_revenue,sum(o.quantity) as total_quantity_sold,
@@ -133,17 +133,21 @@ def get_connection():
     return conn
 
 # Page title
-st.title("SQL Query Runner - Retail Order Data Analysis")
+st.title("Retail Order Data Analysis using SQL")
 
 # Sidebar for categories
-selected_category = st.sidebar.selectbox("Select Query Category:", list(SQL_queries.keys()))
+selected_category = st.selectbox("Select Query Category:", list(SQL_queries.keys()))
 
 # Show queries in the selected category
+
 queries = SQL_queries[selected_category]
 
 for idx, query in enumerate(queries, start=1):
-    # Display the query as a button with the query name
-    if st.button(f"Run Query {idx}: {query['query_name']}"):
+    # Display the query question
+    st.markdown(f"**Query {idx}: {query['query_name']}**")  # Display the question
+
+    # Button to run the query
+    if st.button(f"Run Query {idx}"):
         try:
             # Connect to the database and execute the query
             conn = get_connection()
@@ -157,5 +161,6 @@ for idx, query in enumerate(queries, start=1):
                 st.warning("Query returned no results.")
         except Exception as e:
             st.error(f"An error occurred while executing the query: {e}")
-
-st.text("THANK YOU FOR VISITING MY SITE")
+            
+st.text("THANK YOU VISITORS...!!!")
+st.text("SEE YOU AGAIN...!!!")
