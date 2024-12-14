@@ -132,19 +132,24 @@ def get_connection():
     )
     return conn
 
-page_bg_img = '''
-<style>
-.stApp {
-    background-image: url("C:/Users/ritha/Downloads/boliviainteligente-kECRXz0m42A-unsplash.jpg");
-    background-size: cover;
-    background-repeat: no-repeat;
-    background-attachment: fixed;
-}
-</style>
-'''
+def set_background(image_path):
+    
+    st.markdown(
+        f"""
+        <style>
+        .stApp {{
+            background-image: url("file://{image_path}");
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+        }}
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
 
-# Inject the CSS into the app
-st.markdown(page_bg_img, unsafe_allow_html=True)
+# Set the background image
+set_background("C:/Users/ritha/Downloads/boliviainteligente-kECRXz0m42A-unsplash.jpg")
 
 
 
