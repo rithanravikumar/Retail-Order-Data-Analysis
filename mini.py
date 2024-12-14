@@ -132,6 +132,22 @@ def get_connection():
     )
     return conn
 
+page_bg_img = '''
+<style>
+.stApp {
+    background-image: url("C:/Users/ritha/Downloads/boliviainteligente-kECRXz0m42A-unsplash.jpg");
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+}
+</style>
+'''
+
+# Inject the CSS into the app
+st.markdown(page_bg_img, unsafe_allow_html=True)
+
+
+
 # Page title
 st.title("Retail Order Data Analysis using SQL")
 
