@@ -135,6 +135,8 @@ def get_connection():
 # Page title
 st.title("Retail Order Data Analysis using SQL")
 
+st.image("C:\Users\ritha\Downloads\boliviainteligente-kECRXz0m42A-unsplash.jpg")
+
 # Sidebar for categories
 selected_category = st.selectbox("Select Query Category:", list(SQL_queries.keys()))
 
