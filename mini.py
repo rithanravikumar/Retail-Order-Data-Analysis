@@ -149,7 +149,7 @@ def set_background(image_path):
     )
 
 # Set the background image
-set_background("C:/Users/ritha/Downloads/boliviainteligente-kECRXz0m42A-unsplash.jpg")
+set_background("https://images.unsplash.com/photo-1718241905696-cb34c2c07bed?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTJ8fGRhdGElMjBzY2llbmNlfGVufDB8fDB8fHww")
 
 
 
