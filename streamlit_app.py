@@ -93,13 +93,8 @@ SQL_queries = {
         from product_data p join order_data o on p.product_id=o.product_id group by p.product_id;
     """},
     {"query_name":"Monthly Sales Analysis:","query": """
-        with y1 as (select month,year,sum(sale_price) as msa
-        from order_data where year = 2023 group by month,year),
-        y2 as (select month,year,sum(sale_price) as msa
-        from order_data where year = 2022 group by month,year)
-
-        select y1.month,(((y1.msa - y2.msa) / y2.msa) * 100) as sales_growth_rate from y1 y1 join y2 y2 on
-        y1.month=y2.month and y1.year=y2.year+1 order by y1.month asc;
+        select  year,month, round(sum(sale_price * quantity)::numeric,2) as total_sales 
+        from order_data group by year,month order by year,month;
     """},
     {"query_name":"Product Performance:","query": """
         select p.product_id,p.category,p.sub_category, round(sum(o.sale_price * o.quantity)::numeric,2)as total_revenue,
