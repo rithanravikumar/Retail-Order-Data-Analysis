@@ -106,13 +106,6 @@ SQL_queries = {
        select region, round(count(distinct order_id)::numeric, 2) as total_order, round(sum(sale_price*quantity)::numeric,2) 
        as total_sale, round(sum(profit*quantity)::numeric,2) as total_profit,round((sum(profit)/ sum(sale_price))*100) as profit_margin,
        rank() over(order by round(sum(sale_price* quantity)::numeric,2) desc) from order_data group by region;
-    """},
-     {"query_name":"Discount Analysis:","query":"""
-        select product_id,sum(quantity) as total_quantity,sum(discount_percent) as total_disc_percent,
-        round(sum(discount_price)::numeric,2) as total_discount,
-        round(sum(sale_price)::numeric,2) as total_sale, round((sum(discount_price)::numeric/
-        sum(sale_price)::numeric)* 100,2) as impacted_discount_percentage from order_data 
-        group by product_id having sum(discount_percent)>20 order by impacted_discount_percentage desc;
     """}, 
 ]
 }
